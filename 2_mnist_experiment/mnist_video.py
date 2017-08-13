@@ -121,8 +121,8 @@ def generate_videos(mnist_set, batch):
 
   for i in range(0, len(batch)):
     # Choose two random digits.
-    digit_1 = mnist_set[random.randint(0, len(mnist_set))]
-    digit_2 = mnist_set[random.randint(0, len(mnist_set))]
+    digit_1 = mnist_set[random.randint(0, len(mnist_set) - 1)]
+    digit_2 = mnist_set[random.randint(0, len(mnist_set) - 1)]
 
     # Create and save the video.
     _make_video(digit_1, digit_2, batch[i])
