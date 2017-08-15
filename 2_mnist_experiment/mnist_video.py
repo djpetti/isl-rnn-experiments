@@ -42,7 +42,7 @@ def _draw_number(number, pos, frame):
 
   # We make this additive to two numbers can safely overlap.
   frame[num_y_start:num_y_end, num_x_start:num_x_end] += number
-  frame.clip(0, 255)
+  frame.clip(0, 1)
 
   return frame
 
@@ -56,22 +56,23 @@ def _draw_frame(number_1, number_2, num_1_pos, num_2_pos, frame):
     frame: The frame to draw in. """
   # Draw the numbers.
   _draw_number(number_1, num_1_pos, frame)
-  _draw_number(number_2, num_2_pos, frame)
+  #_draw_number(number_2, num_2_pos, frame)
 
-def _make_video(number_1, number_2, video):
+def _make_video(number_1, number_2, video, frame_size):
   """ Make a 20-frame video of two MNIST numbers moving.
   Args:
     number_1: The image of the first number.
     number_2: The image of the second number.
-    video: The array to write the output video to. Should contain zeros. """
+    video: The array to write the output video to. Should contain zeros.
+    frame_size: The size of each square frame. """
   width, height, _ = number_1.shape
 
   # To begin with, choose random positions for the numbers. We want to make sure
   # that they're not right up against the walls.
-  num_1_x = random.randint(width / 2 + 1, 64 - width / 2 - 1)
-  num_2_x = random.randint(width / 2 + 1, 64 - width / 2 - 1)
-  num_1_y = random.randint(height / 2 + 1, 64 - height / 2 - 1)
-  num_2_y = random.randint(height / 2 + 1, 64 - height / 2 - 1)
+  num_1_x = random.randint(width / 2 + 1, frame_size - width / 2 - 1)
+  num_2_x = random.randint(width / 2 + 1, frame_size - width / 2 - 1)
+  num_1_y = random.randint(height / 2 + 1, frame_size - height / 2 - 1)
+  num_2_y = random.randint(height / 2 + 1, frame_size - height / 2 - 1)
 
   # Choose random velocity vectors.
   num_1_vel = np.array([random.random() - 0.5, random.random() - 0.5])
@@ -100,21 +101,22 @@ def _make_video(number_1, number_2, video):
     num_1_x, num_1_y = num_1_pos.astype("int")
     num_2_x, num_2_y = num_2_pos.astype("int")
 
-    if (num_1_x >= 64 - half_width or num_1_x <= half_width):
+    if (num_1_x >= frame_size - half_width or num_1_x <= half_width):
       num_1_vel[0] *= -1.0
-    if (num_1_y >= 64 - half_height or num_1_y <= half_height):
+    if (num_1_y >= frame_size - half_height or num_1_y <= half_height):
       num_1_vel[1] *= -1.0
-    if (num_2_x >= 64 - half_width or num_2_x <= half_width):
+    if (num_2_x >= frame_size - half_width or num_2_x <= half_width):
       num_2_vel[0] *= -1.0
-    if (num_2_y >= 64 - half_height or num_2_y <= half_height):
+    if (num_2_y >= frame_size - half_height or num_2_y <= half_height):
       num_2_vel[1] *= -1.0
 
-def generate_videos(mnist_set, batch):
+def generate_videos(mnist_set, batch, frame_size=64):
   """ Generates a batch of random videos.
   Args:
     mnist_set: The array of MNIST digits to choose from.
     batch: The batch array to write into. Should be of shape
            (batch_size, 20, 64, 64, 1).
+    frame_size: The size of each square frame.
   """
   # Zero out the array initially.
   batch.fill(0)
@@ -125,4 +127,9 @@ def generate_videos(mnist_set, batch):
     digit_2 = mnist_set[random.randint(0, len(mnist_set) - 1)]
 
     # Create and save the video.
-    _make_video(digit_1, digit_2, batch[i])
+    _make_video(digit_1, digit_2, batch[i], frame_size)
+
+  # Scale and center the data.
+  mean = np.mean(batch)
+  print mean
+  batch -= mean
