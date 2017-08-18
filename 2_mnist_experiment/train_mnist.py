@@ -19,7 +19,7 @@ num_epochs = 20
 # Learning rate.
 learning_rate = 0.001
 
-frame_size = 32
+frame_size = 64
 seq_length = 10
 
 
